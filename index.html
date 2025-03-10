@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <title>AI4HGI Workshop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+<style> 
+
+.text-justify {
+  text-align: justify;
+}
+
+@media (max-width: 1200px) { /* Cambia 1200px se necessario */
+  .square-section {
+    flex-basis: 100%; /* Fa sì che ogni sezione occupi l'intera riga */
+    text-align: center;
+  }
+
+  #game {
+    margin-top: 20px; /* Aggiunge spazio sopra il gioco */
+  }
+}
+
+.row.g-0 {
+  display: flex;
+  flex-wrap: wrap; /* Permette ai div di andare sotto quando serve */
+}
+
+#game {
+  display: grid;
+  grid-template-columns: repeat(3, 75px);
+  grid-template-rows: repeat(3, 75px);
+  gap: 8px;
+  justify-content: center;
+  margin: 10px auto;
+  width: 260px;
+}
+.cell {
+  width: 80px;
+  height: 80px;
+  background-color: #084557;
+  border: 2px solid #444;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffd700;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+    .cell.taken {
+      cursor: not-allowed;
+      color: #999;
+    }
+    .cell:hover:not(.taken) {
+      background-color: #11756b;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 1.5rem;
+    }
+    #reset-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background-color: #b46e05;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #reset-button:hover {
+      background-color: #084557;
+    }
+
+    #title {
+    position: relative;
+    width: 100%;
+    height: 80vh; /* Occupa tutta la schermata */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    overflow: hidden;
+  }
+
+  /* Sfondo con immagine */
+  .background-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('Header.webp') no-repeat center center;
+    background-size: cover;
+    filter: blur(6px); /* Sfocatura dell'immagine */
+    z-index: -1; /* Va dietro il contenuto */
+  }
+
+  /* Contenuto sopra l'immagine */
+  .content {
+    position: relative;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3); /* Leggero sfondo scuro per migliorare la leggibilità */
+    border-radius: 10px;
+  }
+
+
+  </style>
+
+
+</head> 
+
+<body>
+
+      <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary fixed-top px-3 mb-3">
+        <a class="navbar-brand" href="#">AI4HGI</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#description">Description</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#callforpapers">Call for papers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#importantdates">Important dates</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#program">Program</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#organizers">Organizers</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Bootstrap JS (necessario per il funzionamento del menu a tendina) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+      // Chiudere automaticamente il menu a tendina quando si clicca su una voce
+      const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          const navbarCollapse = new bootstrap.Collapse(document.getElementById('navbarNav'), {
+            toggle: false // evita l'auto-toggle
+          });
+          navbarCollapse.hide(); // nasconde il menu
+        });
+      });
+    </script>
+    
+    </div>
+
+    <!-- WORKSHOP TITLE  -->
+    <div id="title">
+      <div class="background-blur"></div>
+      <div class="content">
+        <h1 align="center" style="line-height: 1.5;">
+          The 1st Workshop on Artificial Intelligence <br>
+          for Human-Game Interaction
+        </h1>
+        <br>
+        <p class="lead" align="center">
+          AI4HGI: Workshop @ The 28th European Conference on Artificial Intelligence - Bologna, 25-30 October 2025
+        </p>
+      </div>
+    </div>
+    
+
+    <section class="container-fluid bg-white py-5"> <!--container-md-->
+      <div data-bs-spy="scroll" data-bs-target="#navbar-example2" data-bs-root-margin="0px 0px -40%" data-bs-smooth-scroll="true" class="scrollspy-example  p-3 rounded-2" tabindex="0">
+        <!-- <h4 id="scrollspyHeading1">Description</h4> -->
+        <div class="row g-0 d-flex">
+          <!-- Description -->
+            <div class="col-12 col-md-9 bg-white text-dark d-flex align-items-center justify-content-center square-section ps-md-4">
+              <div>
+                  <h3>Workshop description and motivation </h3>
+                  <br>
+
+              <p class="text-justify" style="font-size: 17px; line-height: 1.6;">
+                  Digital games have become one of the most influential forms of entertainment and interactive media, 
+                  extending their impact beyond leisure into education, health, behavior change, and more.
+                  Artificial Intelligence (AI) is playing an increasingly vital role in shaping these experiences, 
+                  enabling adaptive gameplay, dynamic content generation, and the creation of intelligent non-player characters. 
+                  <strong> AI not only enhances player immersion but also expands the possibilities for storytelling, accessibility, 
+                  and personalized experiences</strong>.
+              </p>
+              <p class="text-justify" style="font-size: 17px; line-height: 1.6;" >
+                The AI4HGI workshop aims to explore the evolving role of AI in human-game interaction by addressing key research questions, including:
+                <ul style="font-size: 17px; line-height: 1.8;" class="text-start text-justify d-inline-block px-5" id="description">
+                  <li class="text-justify">
+                    How AI can enhance <strong>player immersion</strong> and <strong>engagement</strong> in digital games?
+                  </li>
+                  <li class="text-justify">
+                    How can AI contribute to <strong>adaptive storytelling</strong> and <strong>personalized player experiences</strong>?
+                  </li>
+                  <li class="text-justify">
+                    How can AI systems <strong>balance computational efficiency with the complexity of game</strong> interactions?
+                  </li>
+                  <li class="text-justify">
+                    How can <strong>generative AI impact game design</strong> and <strong>creativity</strong>?
+                  </li>
+                  <li class="text-justify">
+                    How should <strong>ethical considerations</strong> such as transparency, fairness, and data privacy be addressed in AI-driven game development?
+                  </li>
+              </ul>
+              </p>
+              <p class="text-justify" style="font-size: 17px; line-height: 1.6;">
+                  In answering these questions, the AI4HGI workshop aims to provide a platform for researchers 
+                  to <strong> discuss innovative solutions, share insights, and identify new research directions. </strong> 
+                  By fostering dialogue at the intersection of AI and game development, the workshop seeks to advance the field 
+                  and contribute to shaping the next generation of intelligent and interactive digital experiences.
+              </p>
+            </div>
+          </div>
+            <div class="col-12 col-md-3 bg-white text-dark d-flex align-items-center justify-content-center square-section ms-auto">
+              <div id="tictactoe-game", align="center">
+                <div id="game"></div>
+                <div id="message">Play tic-tac-toe against the AI!</div>
+                <button id="reset-button">Reset</button>
+              </div>
+            </div>
+        </div>
+      </div>
+      </section>
+
+
+      <dt ></dt>
+      <section id="callforpapers"  class="container-fluid py-5 px-5" style="background: #cee5e2;">
+        <h3>Call for papers</h3>
+        <!-- Call for papers -->
+        <div>
+            <dt class="col-sm-2"></dt>
+            <p style="font-size: 18px; line-height: 1.4;">Topics of interest include but are not limited to:</p>
+            <div class="row text-center">
+                <!-- Reinforcement Learning -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🔁</span>
+                        <h6>Reinforcement Learning in Games</h6>
+                    </div>
+                </div>
+        
+                <!-- Multi-agent Systems -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🤖</span>
+                        <h6>Multi-agent Systems in Games</h6>
+                    </div>
+                </div>
+        
+                <!-- Procedural Content Generation -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🛠️</span>
+                        <h6>Procedural Content Generation</h6>
+                    </div>
+                </div>
+        
+                <!-- AI for Game Balancing -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">⚖️</span>
+                        <h6>AI for Game Balancing</h6>
+                    </div>
+                </div>
+        
+                <!-- AI-enhanced Playtesting -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🎮</span>
+                        <h6>AI-enhanced Playtesting</h6>
+                    </div>
+                </div>
+        
+                <!-- Affective Gaming -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">❤️</span>
+                        <h6>Affective Gaming</h6>
+                    </div>
+                </div>
+        
+                <!-- Player Modeling -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white ">
+                        <span class="fs-4">🧑‍💻</span>
+                        <h6>Player Modeling</h6>
+                    </div>
+                </div>
+        
+                <!-- Gameplay Dynamic Adaptation -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🔄</span>
+                        <h6>Gameplay Dynamic Adaptation</h6>
+                    </div>
+                </div>
+        
+                <!-- NPCs AI -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">👾</span>
+                        <h6>NPCs AI</h6>
+                    </div>
+                </div>
+        
+                <!-- AI-driven Serious Games -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🎯</span>
+                        <h6>AI-driven Serious Games</h6>
+                    </div>
+                </div>
+        
+                <!-- Game-based Learning -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">📚</span>
+                        <h6>Game-based Learning</h6>
+                    </div>
+                </div>
+        
+                <!-- Natural Language Processing -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🗣️</span>
+                        <h6>Natural Language Processing in Games</h6>
+                    </div>
+                </div>
+        
+                <!-- Generative AI for Game Design -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">🖌️</span>
+                        <h6>Generative AI for Game Design</h6>
+                    </div>
+                </div>
+        
+                <!-- Ethical AI -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">⚖️</span>
+                        <h6>Ethical and Responsible AI in Games</h6>
+                    </div>
+                </div>
+        
+                <!-- Explainable AI -->
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+                    <div class="border p-2 rounded bg-white">
+                        <span class="fs-4">📖</span>
+                        <h6>Explainable AI in Games</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+          <!-- Dealines and paper types -->
+      <section class="container-fluid bg-light">
+        <div class="row g-0 d-flex" >
+            
+            <!-- Colonna dei tipi di paper e submission -->
+            <div class="col-12 col-md-6 bg-grey text-dark d-flex align-items-stretch justify-content-center square-section py-5" style="background-color: rgb(251, 247, 236);">
+                <div class="text-center">
+                    <span class="fs-1">📝</span>
+                    <h3 class="mt-3">Paper types and submission</h3>
+                    <br>
+                    <div class="table-responsive d-flex justify-content-center">
+                      <table class="table table-bordered text-start w-75">
+                          <tbody>
+                              <tr>
+                                  <td><strong>Regular papers</strong></td>
+                                  <td>5-10 pages + references – single-column CEURART style</td>
+                              </tr>
+                              <tr>
+                                  <td><strong>Position Papers and Demos</strong></td>
+                                  <td>5-8 pages + references – single-column CEURART style</td>
+                              </tr>
+                              <tr>
+                                  <td><strong>Manifestations of interest</strong></td>
+                                  <td>Max 2 pages including a bio of the participant and a brief statement about why they are interested in the workshop</td>
+                              </tr> 
+                          </tbody>
+                      </table>
+                  </div>
+                  
+                  
+    
+                    <p class="px-4 py-2 text-justify" style="font-size: 17px; line-height: 1.6;">
+                        All papers must be in English and they must be formatted using the single-column <a target="_blank" href="https://www.overleaf.com/latex/templates/template-for-submissions-to-ceur-workshop-proceedings-ceur-ws-dot-org/wqyfdgftmcfw">CEURAT style format</a>.
+                         <br>
+                         <br>
+                        Submitted papers will be evaluated by two members of the Program Committee through a single-blinded process. We aim to publish all accepted papers in CEUR WS Proceedings as a joint volume. 
+                        <br><u> At least one author of each accepted paper must register for the workshop.</u>
+                    </p>
+                    <p class="px-4 py-2 text-justify" style="font-size: 17px; line-height: 1.6;">
+                      Papers must be sumbitted on EasyChair.                 
+                    </p>
+                </div>
+            </div>
+
+            <!-- Colonna delle date importanti -->
+            <div class="col-12 col-md-6 text-dark d-flex align-items-stretch justify-content-center square-section py-5"  id="importantdates" style="background-color: rgb(236, 248, 251);">
+              <div class="text-center">
+                  <!-- Emoji del calendario sopra il titolo -->
+                  <span class="fs-1">📅</span>
+                  <h3 class="mt-3">Important Dates</h3>
+                  <br>
+
+                  <div class="table-responsive d-flex justify-content-center">
+                    <table class="table table-bordered text-start w-100">
+                        <tbody>
+                            <tr>
+                                <td><strong>Submission deadline</strong></td>
+                                <td>15 June, 2025</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Notification to authors</strong></td>
+                                <td>15 July, 2025</td>
+                            </tr>
+                            <tr>
+                              <td><strong>Camera ready version deadline</strong></td>
+                              <td>TBC</td>
+                          </tr>
+                            <tr>
+                                <td><strong>AI4HGI Workshop</strong></td>
+                                <td>25 - 26 October, 2025</td>
+                            </tr>
+                            <tr>
+                              <td><strong>ECAI</strong></td>
+                              <td>25 - 30 October, 2025</td>
+                          </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                  <p class="px-5 py-2 text-justify" style="font-size: 17px; line-height: 1.6;">
+                    All times are in local CEST times for Milan, Italy
+                  </p>
+              </div>
+          </div>
+  
+        </div>
+    </section>
+    
+        
+        
+
+
+          <!-- Program -->
+          <section class="container-fluid  py-3" style="background-color: antiquewhite;">
+            <div class="px-4 py-5">
+              <dt id="program"><h4>Workshop Format & Program</h4></dt>
+              <div class="py-1"></div>
+              <p class="text-justify" style="font-size: 17px; line-height: 1.6;">The workshop will cover half a day and will be centered around discussions. It will begin with pitch paper presentations (5 minutes) to establish a shared knowledge base. 
+                Participants will then be divided into working groups to explore specific topics. 
+                Finally, each group will present a summary of their discussions and propose future directions.</p>
+              <div> TBC </div>
+            </div>
+          </section>
+
+
+          <!-- Organizers and program commetee -->
+          <section class="container-fluid ">
+            <div class="row g-0 d-flex" >
+              <div class="col-12 col-md-6 text-dark d-flex flex-column align-items-center square-section"  style="background-color:azure;">
+                
+                <div class="container text-center px-3 py-3">
+                  <br>
+                <h4 id="organizers">Organizers</h4>
+                <br>
+                    <div class="row row-cols-1 row-cols-md-2 g-3 text-center" >
+                        <div class="col">
+                            <strong>Sabrina Villata</strong><br>
+                            University of Turin, Italy<br>
+                            <a href="mailto:sabrina.villata@unito.it" style="text-decoration: none;">📧</a>
+                        </div>
+                        <div class="col">
+                            <strong>Amon Rapp</strong><br>
+                            University of Turin, Italy<br>
+                            <a href="mailto:amon.rapp@unito.it" style="text-decoration: none;">📧</a>
+                        </div>
+                        <div class="col">
+                            <strong>David Melhart</strong><br>
+                            University of Malta<br>
+                            <a href="mailto:david.melhart@um.edu.mt" style="text-decoration: none;">📧</a>
+                        </div>
+                        <div class="col">
+                            <strong>Matthew Barthet</strong><br>
+                            University of Malta<br>
+                            <a href="mailto:matthew.barthet@um.edu.mt" style="text-decoration: none;">📧</a>
+                        </div>
+                        <div class="col">
+                            <strong>Mike Preuss</strong><br>
+                            Leiden University<br>
+                            <a href="mailto:m.preuss@liacs.leidenuniv.nl" style="text-decoration: none;">📧</a>
+                        </div>
+                        <div class="col">
+                            <strong>Giulio Barbero</strong><br>
+                            Leiden University<br>
+                            <a href="mailto:g.barbero@liacs.leidenuniv.nl" style="text-decoration: none;">📧</a>
+                        </div>
+                    </div>
+                </div>
+                <br>
+          <br>
+            </div>
+            
+            <div class="col-12 col-md-6 text-dark d-flex flex-column align-items-center square-section"style="background-color:rgb(251, 247, 236);">
+              <h4 class="text-center mt-4">PC members:</h4>
+              <div class="text-center mt-2">
+                  <ul class="list-unstyled">
+                    <li><strong>Matthias Müller-Brockhausen</strong>, Leiden University</li>
+                    <li><strong>Tom Kouwenhoven</strong>, Leiden University</li>
+                    <li><strong>Sarra Graja</strong>, Abertay University</li>
+                    <li><strong>Pedro Rodrigues</strong>, Lusófona University</li>
+                    <li><strong>James Goodman</strong>, Queen Mary University of London</li>
+                    <li><strong>Toby Best</strong>, Queen Mary University of London<li>
+                    <li><strong>Joshua Kritz</strong>, Queen Mary University of London</li>
+                    <li><strong>Andrea Nasi</strong>, University of Torino</li>
+                    <li><strong>Vittorio Murtas</strong>, University of Torino</li>
+                    <li><strong>Federica Cena</strong>, University of Torino</li>
+                    <li><strong>Nemanja Rašajski</strong>, University of Malta </li>
+                    <li><strong>Roberto Gallotta</strong>, University of Malta</li>
+                    <li><strong>Debosmita Bhaumik</strong>, University of Malta </li>
+                  </ul>
+              </div>
+          </div>
+          <br>
+          <br>
+          </section>
+            
+        </div>
+      </div>
+
+      <footer class="container-fluid bg-black py-5">
+        <div class="container text-center text-white">
+            <h2 class="mb-4">Thank You for planning on attending AI4HGI!</h2>
+            <p class="lead">We appreciate your participation and contributions.</p>
+            
+            <div class="row mt-1">
+                <div class="col-md- mb-3 text-center">
+                  <a href="https://ecai2025.org/" target="_blank">European Conference of Artificial Intelligence 2025</a>
+                </div>
+            </div>
+
+            <p class="mt-4">&copy; 2025 AI4HGI - All Rights Reserved.</p>
+        </div>
+    </footer>
+     
+<!-- <script src="script.js"></script> -->
+<script>
+  const gameBoard = Array(9).fill(null);
+  const playerSymbol = 'X';
+  const aiSymbol = 'O';
+  let currentPlayer = playerSymbol;
+
+  const gameContainer = document.getElementById('game');
+  const message = document.getElementById('message');
+  const resetButton = document.getElementById('reset-button');
+
+  // Crea la griglia di gioco
+  function createBoard() {
+    gameContainer.innerHTML = ''; // Resetta il contenuto
+    gameBoard.fill(null); // Resetta lo stato
+    gameBoard.forEach((_, index) => {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.index = index;
+      cell.addEventListener('click', onPlayerMove);
+      gameContainer.appendChild(cell);
+    });
+    message.textContent = 'Play against the AI!';
+    currentPlayer = playerSymbol;
+  }
+
+  // Gestione della mossa del giocatore
+  function onPlayerMove(event) {
+    const cellIndex = event.target.dataset.index;
+
+    if (!gameBoard[cellIndex]) {
+      makeMove(cellIndex, playerSymbol);
+      if (!checkWinner(playerSymbol) && !isBoardFull()) {
+        setTimeout(aiMove, 500); // Ritardo per simulare la "riflessione" dell'IA
+      }
+    }
+  }
+
+  // Effettua una mossa
+  function makeMove(index, symbol) {
+    gameBoard[index] = symbol;
+    const cell = document.querySelector(`.cell[data-index='${index}']`);
+    cell.innerHTML = symbol === playerSymbol 
+      ? `<span style="font-size: 2.5rem;">🧠</span>` 
+      : `<span style="font-size: 2.5rem;">🤖</span>`;
+    cell.classList.add('taken');
+    checkGameState(symbol);
+  }
+  function findBestMove(symbol) {
+  const winningCombinations = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+  for (const combination of winningCombinations) {
+    const [a, b, c] = combination;
+    const values = [gameBoard[a], gameBoard[b], gameBoard[c]];
+
+    if (
+      values.filter(v => v === symbol).length === 2 &&
+      values.includes(null)
+    ) {
+      return combination[values.indexOf(null)];
+    }
+  }
+
+  return null;
+  }
+
+  // Mossa dell'AI
+  function aiMove() {
+  const winningMove = findBestMove(aiSymbol);
+  if (winningMove !== null) {
+    makeMove(winningMove, aiSymbol);
+    return;
+  }
+
+  const blockingMove = findBestMove(playerSymbol);
+  if (blockingMove !== null) {
+    makeMove(blockingMove, aiSymbol);
+    return;
+  }
+
+  const emptyCells = gameBoard
+    .map((value, index) => (value === null ? index : null))
+    .filter(index => index !== null);
+  const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    makeMove(randomIndex, aiSymbol);
+  }
+
+    // Controlla lo stato del gioco
+    function checkGameState(symbol) {
+      if (checkWinner(symbol)) {
+        message.textContent = symbol === playerSymbol ? 'You won! 🎉' : 'AI won! 😔';
+        endGame();
+      } else if (isBoardFull()) {
+        message.textContent = 'Draw! 🤝';
+        endGame();
+      }
+    }
+
+    // Controlla se qualcuno ha vinto
+    function checkWinner(symbol) {
+      const winningCombinations = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+
+      return winningCombinations.some(combination =>
+        combination.every(index => gameBoard[index] === symbol)
+      );
+    }
+
+    // Controlla se la griglia è piena
+    function isBoardFull() {
+      return gameBoard.every(cell => cell !== null);
+    }
+
+    // Termina il gioco (disabilita tutte le celle)
+    function endGame() {
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.add('taken');
+      });
+    }
+
+  // Resetta il gioco
+  resetButton.addEventListener('click', createBoard);
+
+  // Inizializza il gioco
+  createBoard();
+</script>
+  
+</body>
+</html>
